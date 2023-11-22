@@ -18,8 +18,33 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "0d9ef78b5cc48e15",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Шаблон для ADR.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f519048481dbf4bc",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -146,10 +171,12 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "b427e859b414a4c5",
+  "active": "f519048481dbf4bc",
   "lastOpenFiles": [
-    "1. Исходные сведения/Архитектурные факторы.md",
+    "Шаблон для ADR.md",
     "README.md",
+    "Пример диаграммы.md",
+    "1. Исходные сведения/Архитектурные факторы.md",
     "1. Исходные сведения"
   ]
 }
