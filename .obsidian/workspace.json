@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1. Исходные сведения/Архитектурные факторы.md",
+                "file": "Пример диаграммы.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "1. Исходные сведения/Архитектурные факторы.md",
+                "file": "Пример диаграммы.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "1. Исходные сведения/Архитектурные факторы.md",
+                "file": "Пример диаграммы.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "1. Исходные сведения/Архитектурные факторы.md"
+                "file": "Пример диаграммы.md"
               }
             }
           }
@@ -149,8 +149,8 @@
   "active": "b427e859b414a4c5",
   "lastOpenFiles": [
     "Шаблон для ADR.md",
-    "Пример диаграммы.md",
     "README.md",
+    "Пример диаграммы.md",
     "1. Исходные сведения/Архитектурные факторы.md",
     "1. Исходные сведения"
   ]
