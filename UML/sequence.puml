@@ -1,0 +1,40 @@
+@startuml
+title Sequence
+
+actor        "Руководитель проекта"     as PM
+actor        Сотрудник                  as Employee
+participant  "Клиентское приложение"    as Frontend
+participant  BACKEND                    as Backend
+participant  "Почтовый сервис"          as Email
+
+group "Создание проекта"
+PM->Frontend:Указать название и описание
+PM->Frontend:Добавить пользователей в проект
+PM->Frontend:Задать настройки проекта
+Frontend->Backend:Создать проект
+Frontend->PM:Сообщить о создании проекта
+end
+
+group "Создание задачи"
+PM->Frontend:Указать название и описание
+PM->Frontend:Назначить исполнителя
+PM->Frontend:Указать проект
+PM->Frontend:Прикрепить файл
+Frontend->Backend:Создать задачу
+Frontend->PM:Сообщить о создании задачи
+Backend->Email: Отправить сообщение о прикреплении задачи на почту сотруднику
+end
+
+group "Взаимодействие с задачей"
+Employee->Frontend: Добавить время выполнения
+Frontend->Backend: Добавить время выполнения
+Frontend->Employee: Сообщить об успешном добавлении
+Employee->Frontend: Завершить задачу
+Frontend->Employee: Открыть форму создания отчёта
+Employee->Frontend: Заполнить отчёт о задаче
+Frontend->Backend: Архивировать задачу и загрузить отчёт
+Backend->Frontend: Сообщить об успешном завершении
+Backend->Email: Отправить сообщение о завершении задачи на почту ПМ
+Frontend->Employee: Сообщить об успешном завершении
+end
+@enduml
