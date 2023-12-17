@@ -20,7 +20,7 @@ System_Ext(video, "Video conference system", "Служит для проведе
 
 System_Boundary(system, "Out Track") {
 	ContainerDb(db, "Database", "MySQL","Для хранения сотрудников, департаментов", $sprite="mysql")
-	Container(webApp, "Web application", "Container: TypeScript And React", "HTML CSS JS", $sprite="react_original")
+	Container(webApp, "Web application", "Container: TypeScript And React", "Веб интерфейс приложения, через который пользователи взаимодействуют с системой", $sprite="react_original")
 	Container(apiGateway, "Api gateway", "OpenResty Nginx Lua", "Кэширование запросов, аутентификация, мониторинг запросов, балансировка", $sprite="nginx_original")
 	Container(api, "Backend monolith", "Container: Golang", "Предоставляет API, реализует бизнес логику", $sprite="go")
 }
