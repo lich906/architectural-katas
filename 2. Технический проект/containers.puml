@@ -25,15 +25,15 @@ System_Boundary(system, "Out Track") {
 	Container(api, "Backend monolith", "Container: Golang", "Предоставляет API, реализует бизнес логику", $sprite="go")
 }
 
-unregistredUser --> apiGateway: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
-employee ---> apiGateway: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
-admin --> apiGateway: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
-projectManager ---> apiGateway: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
-supervisor --> apiGateway: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
-stakeholder ---> apiGateway: [HTTPS] Просматривает аналитику, статусы задач и проектов
+unregistredUser --> webApp: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
+employee ---> webApp: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
+admin --> webApp: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
+projectManager ---> webApp: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
+supervisor --> webApp: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
+stakeholder ---> webApp: [HTTPS] Просматривает аналитику, статусы задач и проектов
 
-apiGateway-->webApp: [HTTP] Запросы к статическим файлам
-apiGateway-->api: Проксирует запросы к API [REST]
+webApp-->apiGateway: [HTTPS] Запросы к API gateway
+apiGateway-->api: [REST] Запросы к API
 api-->calendar: Добавляет время дедлайнов по задачам и событий в
 api-->mail: Отпрвляет повещения пользователям через
 api-->video: Создаёт видео-коференции в
