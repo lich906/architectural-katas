@@ -1,0 +1,64 @@
+@startuml
+title Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <tupadr3/devicons2/mysql>
+!include <tupadr3/devicons2/nginx_original>
+!include <tupadr3/devicons2/react_original>
+!include <tupadr3/devicons2/go>
+!include <tupadr3/material/queue>
+!include <tupadr3/material/mail>
+
+Person(unregistredUser, "Незарегистрированный пользователь", "Отсутствуют личные данные в системе")
+Person(employee, "Работник компании", "Выполняет задачи в рамках проектов")
+Person(admin, "Администратор предприятия", "Менеджер кадровой структуры предприятия")
+Person(projectManager, "Менеджер проекта (ПМ)", "Управляет проектом")
+Person(supervisor, "Руководитель", "Вышестоящий руководитель, наблюдает за прогрессом проекта и оценивает эффективность команды")
+Person(stakeholder, "Стейкхолдер", "Заинтересованное лицо, наблюдающее за прогрессом проекта")
+Person(ops, "Разработчик", "Разработчик или системный администратор, следит за исправной работой сервиса")
+System_Ext(calendar, "Calendar system", "Хранит личное расписание сотрудника, дедлайны задач и время видеоконференций")
+System_Ext(mail, "Email system", "Служит для оповещения сотрудника о назначении задач, новых сообщениях и начале конференций")
+System_Ext(video, "Video conference system", "Служит для проведения видеоконференций")
+
+System_Boundary(system, "Out Track") {
+	ContainerDb(db, "Database", "MySQL","Для хранения сотрудников, департаментов", $sprite="mysql")
+	Container(webApp, "Web application", "Container: TypeScript And React", "Веб интерфейс приложения, через который пользователи взаимодействуют с системой", $sprite="react_original")
+	Container(apiGateway, "Api gateway", "OpenResty Nginx Lua", "Кэширование запросов, аутентификация, мониторинг запросов, балансировка", $sprite="nginx_original")
+
+    rectangle "==Backend monolith" <<boundary>> as priceMicroservice {
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+	            Container(monolithApiTask, "Task API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+	        }
+	        Container(monolithCliLayer, "Command Line Interface", "", "Реализует интерфейс командной строки, доступ к инструментам для ops'ов (бекапы, логи...)")
+	    }
+	    rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+	        Container(monolithInfrastructureTask, "TaskInfrastructure", "", "Сохраняет состояние 'Задачи' в persistent storage, синхронизирует состояние БД")
+	    }
+	    rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppTask, "TaskApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainTask, "Task", "Aggregate", "Cущность 'Задачи'")
+        }
+        monolithApiTask ---> monolithAppTask: "Туда"
+        monolithAppTask ---> monolithDomainTask: "Туда"
+        monolithAppTask ---> monolithInfrastructureTask: "Сюда"
+        monolithInfrastructureTask ---> monolithDomainTask: "Сюда"
+	}
+}
+
+unregistredUser --> webApp: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
+employee ---> webApp: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
+admin --> webApp: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
+projectManager ---> webApp: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
+supervisor --> webApp: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
+stakeholder ---> webApp: [HTTPS] Просматривает аналитику, статусы задач и проектов
+ops ---> monolithCliLayer: Выпоняет консольные команды
+
+webApp-->apiGateway: [HTTPS] Запросы к API gateway
+apiGateway-->api: [REST] Запросы к API
+'monolith-->calendar: Добавляет время дедлайнов по задачам и событий в
+'monolith-->mail: Отпрвляет повещения пользователям через
+'monolith-->video: Создаёт видео-коференции в
+monolithInfrastructureTask-->db: отправляет SQL запросы к
+@enduml
