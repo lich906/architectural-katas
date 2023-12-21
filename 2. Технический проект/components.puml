@@ -8,6 +8,8 @@ title Containers
 !include <tupadr3/material/queue>
 !include <tupadr3/material/mail>
 
+skinparam linetype ortho
+
 Person(unregistredUser, "Незарегистрированный пользователь", "Отсутствуют личные данные в системе")
 Person(employee, "Работник компании", "Выполняет задачи в рамках проектов")
 Person(admin, "Администратор предприятия", "Менеджер кадровой структуры предприятия")
@@ -45,11 +47,11 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainUser, "User", "Aggregate", "Cущность 'Пользователя'")
         }
-        monolithApiUser ---> monolithAppUser
-        monolithAppUser ---> monolithDomainUser
-        monolithInfrastructureUser ---> monolithAppUser
-        monolithInfrastructureUser ---> monolithDomainUser
-        monolithInfrastructureUser-->db: SQL Queries
+        monolithApiUser ----> monolithAppUser
+        monolithAppUser ----> monolithDomainUser
+        monolithInfrastructureUser ----> monolithAppUser
+        monolithInfrastructureUser ----> monolithDomainUser
+        monolithInfrastructureUser ----> db: SQL Queries
 
         'Project
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -66,11 +68,11 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainProject, "Project", "Aggregate", "Cущность 'Проекта'")
         }
-        monolithApiProject ---> monolithAppProject
-        monolithAppProject ---> monolithDomainProject
-        monolithInfrastructureProject ---> monolithAppProject
-        monolithInfrastructureProject ---> monolithDomainProject
-        monolithInfrastructureProject-->db: SQL Queries
+        monolithApiProject ----> monolithAppProject
+        monolithAppProject ----> monolithDomainProject
+        monolithInfrastructureProject ----> monolithAppProject
+        monolithInfrastructureProject ----> monolithDomainProject
+        monolithInfrastructureProject ----> db: SQL Queries
 
         'Board
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -87,11 +89,11 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainBoard, "Board", "Aggregate", "Cущность 'Доски'")
         }
-        monolithApiBoard ---> monolithAppBoard
-        monolithAppBoard ---> monolithDomainBoard
-        monolithInfrastructureBoard ---> monolithAppBoard
-        monolithInfrastructureBoard ---> monolithDomainBoard
-        monolithInfrastructureBoard-->db: SQL Queries
+        monolithApiBoard ----> monolithAppBoard
+        monolithAppBoard ----> monolithDomainBoard
+        monolithInfrastructureBoard ----> monolithAppBoard
+        monolithInfrastructureBoard ----> monolithDomainBoard
+        monolithInfrastructureBoard ----> db: SQL Queries
 
         'Dashboard
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -108,11 +110,11 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainDashboard, "Dashboard", "Aggregate", "Cущность 'Дашборда'")
         }
-        monolithApiDashboard ---> monolithAppDashboard
-        monolithAppDashboard ---> monolithDomainDashboard
-        monolithInfrastructureDashboard ---> monolithAppDashboard
-        monolithInfrastructureDashboard ---> monolithDomainDashboard
-        monolithInfrastructureDashboard-->db: SQL Queries
+        monolithApiDashboard ----> monolithAppDashboard
+        monolithAppDashboard ----> monolithDomainDashboard
+        monolithInfrastructureDashboard ----> monolithAppDashboard
+        monolithInfrastructureDashboard ----> monolithDomainDashboard
+        monolithInfrastructureDashboard ----> db: SQL Queries
 
         'Widget
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -129,11 +131,11 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainWidget, "Widget", "Aggregate", "Cущность 'Виджета'")
         }
-        monolithApiWidget ---> monolithAppWidget
-        monolithAppWidget ---> monolithDomainWidget
-        monolithInfrastructureWidget ---> monolithAppWidget
-        monolithInfrastructureWidget ---> monolithDomainWidget
-        monolithInfrastructureWidget-->db: SQL Queries
+        monolithApiWidget ----> monolithAppWidget
+        monolithAppWidget ----> monolithDomainWidget
+        monolithInfrastructureWidget ----> monolithAppWidget
+        monolithInfrastructureWidget ----> monolithDomainWidget
+        monolithInfrastructureWidget ----> db: SQL Queries
 
         'Chat
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -150,12 +152,12 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainChat, "Chat", "Aggregate", "Cущность 'Чата'")
         }
-        monolithApiChat ---> monolithAppChat
-        monolithAppChat ---> monolithDomainChat
-        monolithInfrastructureChat ---> monolithAppChat
-        monolithInfrastructureChat ---> monolithDomainChat
-        monolithInfrastructureChat-->db: SQL Queries
-        monolithInfrastructureChat-->mail
+        monolithApiChat ----> monolithAppChat
+        monolithAppChat ----> monolithDomainChat
+        monolithInfrastructureChat ----> monolithAppChat
+        monolithInfrastructureChat ----> monolithDomainChat
+        monolithInfrastructureChat---->db: SQL Queries
+        monolithInfrastructureChat ----> mail
 
         'Videoconference
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -172,14 +174,14 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainVideoconference, "Videoconference", "Aggregate", "Cущность 'Видеоконференции'")
         }
-        monolithApiVideoconference ---> monolithAppVideoconference
-        monolithAppVideoconference ---> monolithDomainVideoconference
-        monolithInfrastructureVideoconference ---> monolithAppVideoconference
-        monolithInfrastructureVideoconference ---> monolithDomainVideoconference
-        monolithInfrastructureVideoconference-->db: SQL Queries
-        monolithInfrastructureVideoconference-->video
-        monolithInfrastructureVideoconference-->calendar
-        monolithInfrastructureVideoconference-->mail
+        monolithApiVideoconference ----> monolithAppVideoconference
+        monolithAppVideoconference ----> monolithDomainVideoconference
+        monolithInfrastructureVideoconference ----> monolithAppVideoconference
+        monolithInfrastructureVideoconference ----> monolithDomainVideoconference
+        monolithInfrastructureVideoconference ----> db: SQL Queries
+        monolithInfrastructureVideoconference ----> video
+        monolithInfrastructureVideoconference ----> calendar
+        monolithInfrastructureVideoconference ----> mail
 
         'Task
         rectangle "==Presentation Layer" <<boundary>> as presentation {
@@ -196,31 +198,31 @@ System_Boundary(system, "Out Track") {
         rectangle "==Domain Layer" <<boundary>> as domain {
             Container(monolithDomainTask, "Task", "Aggregate", "Cущность 'Задачи'")
         }
-        monolithApiTask ---> monolithAppTask
-        monolithAppTask ---> monolithDomainTask
-        monolithInfrastructureTask ---> monolithAppTask
-        monolithInfrastructureTask ---> monolithDomainTask
-        monolithInfrastructureTask-->db: SQL Queries
-        monolithInfrastructureTask-->calendar
-        monolithInfrastructureTask-->mail
+        monolithApiTask ----> monolithAppTask
+        monolithAppTask ----> monolithDomainTask
+        monolithInfrastructureTask ----> monolithAppTask
+        monolithInfrastructureTask ----> monolithDomainTask
+        monolithInfrastructureTask ----> db: SQL Queries
+        monolithInfrastructureTask ----> calendar
+        monolithInfrastructureTask ----> mail
 
         'Contextual Dependencies
-        monolithDomainBoard ---> monolithDomainProject
-        monolithDomainTask ---> monolithDomainProject
-        monolithDomainChat ---> monolithDomainProject
-        monolithDomainWidget ---> monolithDomainDashboard
+        monolithDomainBoard ----> monolithDomainProject
+        monolithDomainTask ----> monolithDomainProject
+        monolithDomainChat ----> monolithDomainProject
+        monolithDomainWidget ----> monolithDomainDashboard
 	}
 }
 
-unregistredUser --> webApp: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
-employee ---> webApp: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
-admin --> webApp: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
-projectManager ---> webApp: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
-supervisor --> webApp: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
-stakeholder ---> webApp: [HTTPS] Просматривает аналитику, статусы задач и проектов
-ops ---> monolithCliLayer: Выпоняет консольные команды
+unregistredUser ----> webApp: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
+employee ----> webApp: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
+admin ----> webApp: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
+projectManager ----> webApp: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
+supervisor ----> webApp: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
+stakeholder ----> webApp: [HTTPS] Просматривает аналитику, статусы задач и проектов
+ops ----> monolithCliLayer: Выпоняет консольные команды
 
-webApp-->apiGateway: [HTTPS] Запросы к API gateway
-apiGateway-->api: [REST] Запросы к API
+webApp ----> apiGateway: [HTTPS] Запросы к API gateway
+apiGateway ----> api: [REST] Запросы к API
 SHOW_LEGEND()
 @enduml
