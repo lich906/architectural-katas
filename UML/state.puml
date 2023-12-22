@@ -1,0 +1,14 @@
+@startuml
+[*]     --> TaskCreated :Создать задачу
+TaskCreated : Задача создана
+TaskCreated --> NotificationSent: Отправить уведомление
+NotificationSent: Исполнитель получил уведомление
+NotificationSent-->TimeTracked: Добавить время выполнения
+TimeTracked: Время выполнения сохранено
+TimeTracked-->CalendarUpdated: Загрузить в календарь
+CalendarUpdated: Дедлайн по задаче добавлен в календарь
+CalendarUpdated-->TaskArchived: Завершить задачу
+TaskArchived: Задача архивирована
+TaskArchived-->ReportSended: Отправить отчёт
+ReportSended: Отчёт отправлен
+@enduml
