@@ -1,0 +1,56 @@
+@startuml
+  !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+!include <tupadr3/devicons2/postgresql>
+!include <tupadr3/material/queue>
+
+LAYOUT_WITH_LEGEND()
+
+title Диаграмма развертывания типового микросервиса для системы такси GetRide
+
+Deployment_Node(dc, "Датацентр Yandex Cloud", "Система заказа такси"){
+    Deployment_Node(prod, "Зона доступности", "ru-central1-a"){
+        Container(apiGateway, "API-gateway", "yc-apigateway", "Распределяем запросы между мобильными клиентами и веб-клиентами по разным микросервисам")
+
+        Container(loadBalancer, "Балансировщик нагрузки", "yc-nlb", "Распределяет сетевую нагрузку по облачным ресурсам")
+
+        'Микросервис пользователей
+        Deployment_Node(deckhouse, "Платформа Deckhouse на Yandex Cloud", "deckhouse"){
+            Deployment_Node(deckhouseNodeGroup, "Группа нод микросервиса пользователей", "deckhouse node group"){
+                Deployment_Node(deckhouseNode, "Нода микросервиса пользователей", "k8s node"){
+                    Deployment_Node(deckhousePod, "Под микросервиса пользователей", "k8s pod"){
+                        Container(userMicroservice, "Микросервис пользователей", "C++", "Редактирование пользователем информации в своем аккаунте")
+                    }
+                }
+            }
+        }
+
+        Deployment_Node(clusterPostgreSQL, "Кластер Yandex Managed Service for PostgreSQL", "yc managed-postgresql", "Кластер состоит из одного хоста БД — виртуальной машины с развернутой СУБД"){
+            Deployment_Node(clusterPostgreSQLHost, "Production DB Host", "Standart s3-c96-m576", "Standard — стандартные ВМ с соотношением объема RAM к ядрам vCPU 4:1. Имеем 96 ядер CPU и 576 ГБ памяти"){
+                ContainerDb(userMicroserviceDB, "База данных микросервиса пользователя", "PostgreSQL", "Сохраняет предоставленную личную информацию пользователя", $sprite="postgresql")
+            }
+        }
+
+        'Брокер сообщений
+        Deployment_Node(clusterApacheKafkaQueue, "Кластер Yandex Managed Service for Apache Kafka®", "yc managed-kafka", " Кластер состоит из одного хоста-брокера, на котором размещены топики и их разделы."){
+            Deployment_Node(clusterApacheKafkaQueueHost, "Production Queue Host", "Memory-optimized m3-c12-m96", "Memory-optimized — ВМ с увеличенным соотношением RAM к vCPU (8:1). Имеем 12 ядер CPU и 96 ГБ памяти"){
+                ContainerQueue(queueContainer, "Очередь событий ", "Apache Kafka®", "Сообщения по топикам, ожидающие обработки")
+            }
+        }
+    }
+}
+
+Deployment_Node(mobileApp, "Мобильное устройство пользователя", "Apple IOS или Android"){
+    Container(clientMobileApp, "Мобильное кроссплатформенное приложение клиента", "Flutter", "Мобильное приложение клиента для заказа такси")
+}
+
+apiGateway --> loadBalancer
+loadBalancer --> deckhouse
+userMicroservice --> clusterPostgreSQL : "Прочитать/Записать информацию"
+userMicroservice --> clusterApacheKafkaQueue : "Публикация события изменения агрегата клиента/водителя"
+
+mobileApp --> apiGateway : "Отправка запроса\n[HTTPS/JSON]"
+
+SHOW_LEGEND()
+
+@enduml
