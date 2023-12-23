@@ -1,0 +1,235 @@
+@startuml
+title Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <tupadr3/devicons2/mysql>
+!include <tupadr3/devicons2/nginx_original>
+!include <tupadr3/devicons2/react_original>
+!include <tupadr3/devicons2/go>
+!include <tupadr3/material/queue>
+!include <tupadr3/material/mail>
+
+'skinparam linetype ortho
+
+Person(unregistredUser, "Незарегистрированный пользователь", "Отсутствуют личные данные в системе")
+Person(employee, "Работник компании", "Выполняет задачи в рамках проектов")
+Person(admin, "Администратор предприятия", "Менеджер кадровой структуры предприятия")
+Person(projectManager, "Менеджер проекта (ПМ)", "Управляет проектом")
+Person(supervisor, "Руководитель", "Вышестоящий руководитель, наблюдает за прогрессом проекта и оценивает эффективность команды")
+Person(stakeholder, "Стейкхолдер", "Заинтересованное лицо, наблюдающее за прогрессом проекта")
+Person(ops, "Разработчик", "Разработчик или системный администратор, следит за исправной работой сервиса")
+System_Ext(calendar, "Calendar system", "Хранит личное расписание сотрудника, дедлайны задач и время видеоконференций")
+System_Ext(mail, "Email system", "Служит для оповещения сотрудника о назначении задач, новых сообщениях и начале конференций")
+System_Ext(video, "Video conference system", "Служит для проведения видеоконференций")
+
+System_Boundary(system, "Out Track") {
+	ContainerDb(db, "Database", "MySQL","Для хранения сотрудников, департаментов", $sprite="mysql")
+	Container(webApp, "Web application", "Container: TypeScript And React", "Веб интерфейс приложения, через который пользователи взаимодействуют с системой", $sprite="react_original")
+	Container(apiGateway, "Api gateway", "OpenResty Nginx Lua", "Кэширование запросов, аутентификация, мониторинг запросов, балансировка", $sprite="nginx_original")
+
+    rectangle "==Backend monolith" <<boundary>> as priceMicroservice {
+        'CLI
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            Container(monolithCliLayer, "Command Line Interface", "", "Реализует интерфейс командной строки, доступ к инструментам для ops'ов (бекапы, логи...)")
+        }
+
+        'User
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiUser, "User API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+	    rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+	        Container(monolithInfrastructureUser, "UserInfrastructure", "", "Сохраняет состояние 'Пользователя' в persistent storage, синхронизирует состояние БД")
+	    }
+	    rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppUser, "UserApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainUser, "User", "Aggregate", "Cущность 'Пользователя'")
+        }
+        monolithApiUser ---> monolithAppUser
+        monolithAppUser ---> monolithDomainUser
+        monolithInfrastructureUser ---> monolithAppUser
+        monolithInfrastructureUser ---> monolithDomainUser
+        monolithInfrastructureUser ---> db: SQL Queries
+
+        'Project
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiProject, "Project API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+	    rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+	        Container(monolithInfrastructureProject, "ProjectInfrastructure", "", "Сохраняет состояние 'Проекта' в persistent storage, синхронизирует состояние БД")
+	    }
+	    rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppProject, "ProjectApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainProject, "Project", "Aggregate", "Cущность 'Проекта'")
+        }
+        monolithApiProject ---> monolithAppProject
+        monolithAppProject ---> monolithDomainProject
+        monolithInfrastructureProject ---> monolithAppProject
+        monolithInfrastructureProject ---> monolithDomainProject
+        monolithInfrastructureProject ---> db: SQL Queries
+
+        'Board
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiBoard, "Board API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+        rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+            Container(monolithInfrastructureBoard, "BoardInfrastructure", "", "Сохраняет состояние 'Доски' в persistent storage, синхронизирует состояние БД")
+        }
+        rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppBoard, "BoardApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainBoard, "Board", "Aggregate", "Cущность 'Доски'")
+        }
+        monolithApiBoard ---> monolithAppBoard
+        monolithAppBoard ---> monolithDomainBoard
+        monolithInfrastructureBoard ---> monolithAppBoard
+        monolithInfrastructureBoard ---> monolithDomainBoard
+        monolithInfrastructureBoard ---> db: SQL Queries
+
+        'Dashboard
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiDashboard, "Dashboard API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+        rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+            Container(monolithInfrastructureDashboard, "DashboardInfrastructure", "", "Сохраняет состояние 'Дашборда' в persistent storage, синхронизирует состояние БД")
+        }
+        rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppDashboard, "DashboardApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainDashboard, "Dashboard", "Aggregate", "Cущность 'Дашборда'")
+        }
+        monolithApiDashboard ---> monolithAppDashboard
+        monolithAppDashboard ---> monolithDomainDashboard
+        monolithInfrastructureDashboard ---> monolithAppDashboard
+        monolithInfrastructureDashboard ---> monolithDomainDashboard
+        monolithInfrastructureDashboard ---> db: SQL Queries
+
+        'Widget
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiWidget, "Widget API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+        rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+            Container(monolithInfrastructureWidget, "WidgetInfrastructure", "", "Сохраняет состояние 'Виджета' в persistent storage, синхронизирует состояние БД")
+        }
+        rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppWidget, "WidgetApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainWidget, "Widget", "Aggregate", "Cущность 'Виджета'")
+        }
+        monolithApiWidget ---> monolithAppWidget
+        monolithAppWidget ---> monolithDomainWidget
+        monolithInfrastructureWidget ---> monolithAppWidget
+        monolithInfrastructureWidget ---> monolithDomainWidget
+        monolithInfrastructureWidget ---> db: SQL Queries
+
+        'Chat
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiChat, "Chat API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+        rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+            Container(monolithInfrastructureChat, "ChatInfrastructure", "", "Сохраняет состояние 'Чата' в persistent storage, синхронизирует состояние БД")
+        }
+        rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppChat, "ChatApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainChat, "Chat", "Aggregate", "Cущность 'Чата'")
+        }
+        monolithApiChat ---> monolithAppChat
+        monolithAppChat ---> monolithDomainChat
+        monolithInfrastructureChat ---> monolithAppChat
+        monolithInfrastructureChat ---> monolithDomainChat
+        monolithInfrastructureChat--->db: SQL Queries
+        monolithInfrastructureChat ---> mail
+
+        'Videoconference
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+                Container(monolithApiVideoconference, "Videoconference API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+            }
+        }
+        rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+            Container(monolithInfrastructureVideoconference, "VideoconferenceInfrastructure", "", "Сохраняет состояние 'Видеоконференции' в persistent storage, синхронизирует состояние БД")
+        }
+        rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppVideoconference, "VideoconferenceApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainVideoconference, "Videoconference", "Aggregate", "Cущность 'Видеоконференции'")
+        }
+        monolithApiVideoconference ---> monolithAppVideoconference
+        monolithAppVideoconference ---> monolithDomainVideoconference
+        monolithInfrastructureVideoconference ---> monolithAppVideoconference
+        monolithInfrastructureVideoconference ---> monolithDomainVideoconference
+        monolithInfrastructureVideoconference ---> db: SQL Queries
+        monolithInfrastructureVideoconference ---> video
+        monolithInfrastructureVideoconference ---> calendar
+        monolithInfrastructureVideoconference ---> mail
+
+        'Task
+        rectangle "==Presentation Layer" <<boundary>> as presentation {
+            rectangle "==API Layer" <<boundary>> as api {
+	            Container(monolithApiTask, "Task API endpoints", "", "Предоставляет эндпоинты API для работы с монолитом через REST")
+	        }
+	    }
+	    rectangle "==Infrastructure Layer" <<boundary>> as infrastructure {
+	        Container(monolithInfrastructureTask, "TaskInfrastructure", "", "Сохраняет состояние 'Задачи' в persistent storage, синхронизирует состояние БД")
+	    }
+	    rectangle "==Application Layer" <<boundary>> as application {
+            Container(monolithAppTask, "TaskApplication", "Input/Output DTOs, Mappers...", "Трансформирует данные из API слоя в вид, пригодный для доменных объектов. Трансформирует данные доменных объектов в данные для отображения в API слое")
+        }
+        rectangle "==Domain Layer" <<boundary>> as domain {
+            Container(monolithDomainTask, "Task", "Aggregate", "Cущность 'Задачи'")
+        }
+        monolithApiTask ---> monolithAppTask
+        monolithAppTask ---> monolithDomainTask
+        monolithInfrastructureTask ---> monolithAppTask
+        monolithInfrastructureTask ---> monolithDomainTask
+        monolithInfrastructureTask ---> db: SQL Queries
+        monolithInfrastructureTask ---> calendar
+        monolithInfrastructureTask ---> mail
+
+        'Contextual Dependencies
+        monolithDomainBoard ---> monolithDomainProject
+        monolithDomainBoard ---> monolithDomainTask
+        monolithDomainTask ---> monolithDomainProject
+        monolithDomainChat ---> monolithDomainProject
+        monolithDomainWidget ---> monolithDomainDashboard
+
+        monolithAppBoard ---> monolithAppTask
+        monolithAppBoard ---> monolithAppProject
+        monolithAppTask ---> monolithAppProject
+        monolithAppUser ---> monolithAppProject
+        monolithAppDashboard ---> monolithAppWidget
+	}
+}
+
+unregistredUser ---> webApp: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
+employee ---> webApp: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
+admin ---> webApp: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
+projectManager ---> webApp: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
+supervisor ---> webApp: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
+stakeholder ---> webApp: [HTTPS] Просматривает аналитику, статусы задач и проектов
+ops ---> monolithCliLayer: Выпоняет консольные команды
+
+webApp ---> apiGateway: [HTTPS] Запросы к API gateway
+apiGateway ---> api: [REST] Запросы к API
+SHOW_LEGEND()
+@enduml
