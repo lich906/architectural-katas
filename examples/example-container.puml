@@ -1,6 +1,5 @@
-```plantuml Context
-
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+@startuml
+title Example container
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 Person(employee, "Employee", "Работник предприятия")
@@ -27,5 +26,4 @@ Rel(apiGateway, api, "Перенаправляет API запросы")
 Rel(api, bank, "Делает API Запросы")
 Rel(api, employeeDb, "совершает CRUD запросы")
 Rel(api, authDb, "совершает CRUD запросы")
-
-```
+@enduml

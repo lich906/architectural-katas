@@ -1,0 +1,41 @@
+@startuml
+title Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <tupadr3/devicons2/mysql>
+!include <tupadr3/devicons2/nginx_original>
+!include <tupadr3/devicons2/react_original>
+!include <tupadr3/devicons2/go>
+!include <tupadr3/material/queue>
+!include <tupadr3/material/mail>
+
+Person(unregistredUser, "Незарегистрированный пользователь", "Отсутствуют личные данные в системе")
+Person(employee, "Работник компании", "Выполняет задачи в рамках проектов")
+Person(admin, "Администратор предприятия", "Менеджер кадровой структуры предприятия")
+Person(projectManager, "Менеджер проекта (ПМ)", "Управляет проектом")
+Person(supervisor, "Руководитель", "Вышестоящий руководитель, наблюдает за прогрессом проекта и оценивает эффективность команды")
+Person(stakeholder, "Стейкхолдер", "Заинтересованное лицо, наблюдающее за прогрессом проекта")
+System_Ext(calendar, "Calendar system", "Хранит личное расписание сотрудника, дедлайны задач и время видеоконференций")
+System_Ext(mail, "Email system", "Служит для оповещения сотрудника о назначении задач, новых сообщениях и начале конференций")
+System_Ext(video, "Video conference system", "Служит для проведения видеоконференций")
+
+System_Boundary(system, "Out Track") {
+	ContainerDb(db, "Database", "MySQL","Для хранения сотрудников, департаментов", $sprite="mysql")
+	Container(webApp, "Web application", "Container: TypeScript And React", "Веб интерфейс приложения, через который пользователи взаимодействуют с системой", $sprite="react_original")
+	Container(apiGateway, "Api gateway", "OpenResty Nginx Lua", "Кэширование запросов, аутентификация, мониторинг запросов, балансировка", $sprite="nginx_original")
+	Container(api, "Backend monolith", "Container: Golang", "Предоставляет API, реализует бизнес логику", $sprite="go")
+}
+
+unregistredUser --> webApp: [HTTPS] Выполняет вход в систему по логину и паролю, полученным от администратора
+employee ---> webApp: [HTTPS] Создаёт задачи, управляет своими задачами, отмечает затраченное на задачу время, отчитывается о завершении задачи
+admin --> webApp: [HTTPS] Добавляет новых пользователей в систему, администрирует роли
+projectManager ---> webApp: [HTTPS] Создаёт и редактирует проекты и задачи, получает отчёты
+supervisor --> webApp: [HTTPS] Просматривает аналитику по задачам на дэшбордах, статусы задач и проектов
+stakeholder ---> webApp: [HTTPS] Просматривает аналитику, статусы задач и проектов
+
+webApp-->apiGateway: [HTTPS] Запросы к API gateway
+apiGateway-->api: [REST] Запросы к API
+api-->calendar: Добавляет время дедлайнов по задачам и событий в
+api-->mail: Отпрвляет повещения пользователям через
+api-->video: Создаёт видео-коференции в
+api-->db: отправляет SQL запросы к
+@enduml

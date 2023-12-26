@@ -1,0 +1,116 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+package "Development" {
+    actor "Разработчик"
+    actor "Тестировщик"
+    component "Git"
+    folder "CD pipeline by ArgoCD"{
+        component [ArgoCD]
+    }
+    folder "Continuous Integration/Continuous Delivery pipeline by werf" {
+        component "build"
+        component "publish"
+        component "test"
+        component "release"
+        component "prepare release artifacts"
+        component "acceptance testing"
+
+        [build] -> [publish]
+        [publish] -> [test]
+        [test] -> [release]
+        [release] -> [prepare release artifacts]
+        [prepare release artifacts] -> [acceptance testing]
+    }
+
+    [Git] -> [Continuous Integration/Continuous Delivery pipeline by werf] : "Выкладка изменений"
+    [Разработчик] -> [Git] : "Разработка фич\nНаписание модульных тестов"
+    [Тестировщик] -> [Git] : "Написание автотестов end-to-end и интеграционных"
+    [acceptance testing] -> [CD pipeline by ArgoCD]
+}
+
+actor "DevOps разработчик"
+actor "Системный администратор"
+[DevOps разработчик] -> [Continuous Integration/Continuous Delivery pipeline by werf] : "Настройка пайплайна"
+[DevOps разработчик] --> [CD pipeline by ArgoCD] : "Настройка пайплайна"
+
+folder "Yandex Cloud"{
+    folder "Зона доступности ru-central1-a" {
+        folder "K3S Cluster"{
+            component "Группа узлов" {
+                component "Узел DB" {
+                    component "Под Master DB" {
+                        [Master DB]
+                    }
+                }
+                component "Узел Monolith" {
+                    component "Под Monolith" {
+                        [GO Monolith]
+                    }
+                }
+            }
+        }
+
+        package "Analytics Tools" {
+            [Power BI]
+            [Analytics Storage]
+        }
+
+        [Power BI] -> [Analytics Storage]
+        [Analytics Storage] --> [Master DB]
+
+        package "Мониторинги" {
+            folder "K3S Node for ELK" {
+                component "Logstash"
+                component "Elasticsearch"
+                component "Kibana"
+
+                [Группа узлов] --> [Logstash] : "Отправить данные"
+                [Logstash] -> [Elasticsearch]
+                [Elasticsearch] -> [Kibana]
+            }
+
+            folder "K3S Node for Prometheus" {
+                component "Prometheus"
+                [Prometheus] --> "Группа узлов" : "Запуллить метрики"
+                component "Graphana"
+                [Prometheus] --> [Graphana]
+                component "Хранилище"
+                [Prometheus] --> [Хранилище] : "Cохранить метрики"
+                component "Prometheus alert manager"
+                component "Email"
+                [Prometheus] -> [Prometheus alert manager]
+                [Prometheus alert manager] --> [Email]
+                [Prometheus alert manager] --> [Messenger]
+                [Email] ---> [Системный администратор]
+                [Messenger] ---> [Системный администратор]
+            }
+
+            [Системный администратор] -> [Мониторинги] : "Настраивает мониторинги"
+        }
+    }
+}
+
+[ArgoCD] ----> [K3S Cluster]: "Деплой в продакшн"
+
+package "Артефакты" {
+    [ArgoCD] --> [Container Registry]: "Подтянуть изменения"
+    [ArgoCD] --> [Настройки конфигурации]: "Получить настройки конфигурации"
+}
+
+actor "Аналитик"
+[Аналитик] --> [Power BI] : "Анализирует данные"
+[Аналитик] --> [Kibana] : "Анализирует данные"
+
+package "Учет задач" {
+    component "Avion"
+    component "Jira"
+    [Avion] -> [Jira] : "Нарезка задач"
+}
+[Аналитик] --> [Avion] : "Добавление задач в беклог"
+actor "Владелец продукта"
+[Владелец продукта] --> [Avion] : "Определение приоритетов задач"
+
+[Разработчик] --> [Jira] : "Выбрать задачу для разработки"
+
+@enduml

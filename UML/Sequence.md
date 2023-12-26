@@ -1,0 +1,1 @@
+![Sequence](sequence-diagram.png)
