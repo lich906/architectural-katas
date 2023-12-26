@@ -10,50 +10,47 @@ LAYOUT_WITH_LEGEND()
 title Диаграмма развертывания системы OutTrack на инфраструктуре клиента
 
 Deployment_Node(vdc, "Виртуальный дата центр клиента", "vdc-1"){
-    Deployment_Node(vdm, "Виртуальная машина", "vm-1"){
-        Deployment_Node(k3sCluster, "Кластер k3s", "k3s-cluster-1"){
-            Deployment_Node(webAppNode, "Нода веб-приложения", "k3s-node-web-app-1"){
-                Deployment_Node(k3s-pod-web-app-1, "Нода веб-приложения", "k3s-pod-web-app-1"){
-                    Container(webAppPod, "Web App", "web-app-pod-1", "Веб-приложение, через которое пользователи взаимодействуют с системой", $sprite="react_original")
-                }
+    Deployment_Node(k3sCluster, "Кластер k3s", "k3s-cluster-1"){
+        Deployment_Node(webAppNode, "Нода веб-приложения", "k3s-node-web-app-1", "Отдельная виртуальная машина"){
+            Deployment_Node(k3s-pod-web-app-1, "Под веб-приложения", "k3s-pod-web-app-1"){
+                Container(webAppPod, "Web App", "web-app-pod-1", "Веб-приложение, через которое пользователи взаимодействуют с системой", $sprite="react_original")
             }
+        }
 
-            Deployment_Node(gwNode, "Gateway Node", "k3s-node-gw-1"){
-                Deployment_Node(gw-pod-1, "Gateway Node", "gw-pod-1"){
-                    Container(gwPod, "API-gateway", "OpenResty, Nginx, Lua", "Единая точка вызова для API, контроль токенов авторизации, middleware конвеера запросов", $sprite="nginx_original")
-                }
-                Container(lb, "Load balancer", "klipper-lb", "Распределение нагрузки между репликами монолита, встроенный load balancer k3s")
+        Deployment_Node(gwNode, "Gateway Node", "k3s-node-gw-1", "Отдельная виртуальная машина"){
+            Deployment_Node(gw-pod-1, "Под API Gateway", "gw-pod-1"){
+                Container(gwPod, "API-gateway", "OpenResty, Nginx, Lua", "Единая точка вызова для API, контроль токенов авторизации, middleware конвеера запросов", $sprite="nginx_original")
             }
+            Container(lb, "Load balancer", "klipper-lb", "Распределение нагрузки между репликами монолита, встроенный load balancer k3s")
+        }
 
-            'Ноды монолита
-            Deployment_Node(k3s-node-monolith-1, "Нода монолита", "k3s-node-monolith-1"){
-                Deployment_Node(k3s-pod-monolith-1, "Под монолита", "k3s-pod-monolith-1"){
-                    Container(monolithPod1, "Инстанс монолита", "monolith", "Предоставляет API, реализует бизнес логику", $sprite="go")
-                }
-                Deployment_Node(k3s-pod-slave-db-1, "Под slave базы данных", "k3s-pod-slave-db-1"){
-                    ContainerDb(slaveDbPod1, "Slave DB", "MySQL", "Slave база данных для реплики монолита", "", $sprite="mysql")
-                }
+        'Ноды монолита
+        Deployment_Node(k3s-node-monolith-1, "Нода монолита", "k3s-node-monolith-1", "Отдельная виртуальная машина"){
+            Deployment_Node(k3s-pod-monolith-1, "Под монолита", "k3s-pod-monolith-1"){
+                Container(monolithPod1, "Инстанс монолита", "monolith", "Предоставляет API, реализует бизнес логику", $sprite="go")
             }
-
-            Deployment_Node(k3s-node-monolith-2, "Нода монолита", "k3s-node-monolith-2"){
-                Deployment_Node(k3s-pod-monolith-2, "Под монолита", "k3s-pod-monolith-2"){
-                    Container(monolithPod2, "Инстанс монолита", "monolith", "Предоставляет API, реализует бизнес логику", $sprite="go")
-                }
-                Deployment_Node(k3s-pod-slave-db-2, "Под slave базы данных", "k3s-pod-slave-db-2"){
-                    ContainerDb(slaveDbPod2, "Slave DB", "MySQL", "Slave база данных для реплики монолита", "", $sprite="mysql")
-                }
+            Deployment_Node(k3s-pod-slave-db-1, "Под slave базы данных", "k3s-pod-slave-db-1"){
+                ContainerDb(slaveDbPod1, "Slave DB", "MySQL", "Slave база данных для реплики монолита", "", $sprite="mysql")
             }
+        }
 
-            Deployment_Node(masterDbNode, "Нода Master базы данных", "master-db-node", "Кластер состоит из одного хоста БД — виртуальной машины с развернутой СУБД"){
-                Deployment_Node(k3s-pod-master-db, "Под Master базы данных", "master-db-pod", "Кластер состоит из одного хоста БД — виртуальной машины с развернутой СУБД"){
-                    ContainerDb(masterDbPod, "Master DB", "MySQL", "Сохраняет состояние системы, которое синхронизируется со всеми slave нодами", "", $sprite="mysql")
-                }
+        Deployment_Node(k3s-node-monolith-2, "Нода монолита", "k3s-node-monolith-2", "Отдельная виртуальная машина"){
+            Deployment_Node(k3s-pod-monolith-2, "Под монолита", "k3s-pod-monolith-2"){
+                Container(monolithPod2, "Инстанс монолита", "monolith", "Предоставляет API, реализует бизнес логику", $sprite="go")
+            }
+            Deployment_Node(k3s-pod-slave-db-2, "Под slave базы данных", "k3s-pod-slave-db-2"){
+                ContainerDb(slaveDbPod2, "Slave DB", "MySQL", "Slave база данных для реплики монолита", "", $sprite="mysql")
+            }
+        }
+
+        Deployment_Node(masterDbNode, "Нода Master базы данных", "master-db-node", "Кластер состоит из одного хоста БД — виртуальной машины с развернутой СУБД"){
+            Deployment_Node(k3s-pod-master-db, "Под Master базы данных", "master-db-pod", "Кластер состоит из одного хоста БД — виртуальной машины с развернутой СУБД"){
+                ContainerDb(masterDbPod, "Master DB", "MySQL", "Сохраняет состояние системы, которое синхронизируется со всеми slave нодами", "", $sprite="mysql")
             }
         }
     }
 }
 
-webAppPod ----> gwPod
 gwPod ----> lb
 lb ----> monolithPod1
 lb ----> monolithPod2
